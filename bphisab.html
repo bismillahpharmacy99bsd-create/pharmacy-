@@ -2010,6 +2010,7 @@ function showSingleBill(type, id){
 
 function openMemoModal(type, custId=null){
   window._currentKroyEntry=null;
+  window._currentMemoType=type;
   currentMemoType=type;
   currentMemoCustomerId=custId;
   let entries=[];
@@ -2028,18 +2029,23 @@ function openMemoModal(type, custId=null){
 
 function generateMemo(){
   const note=document.getElementById('memoNote').value;
-  if(window._currentKroyEntry){
+  const memoType = window._currentMemoType || currentMemoType;
+  if(memoType==='kroy' && window._currentKroyEntry){
     renderKroyBill(window._currentKroyEntry, note);
     toast('✅ নোট যোগ হয়েছে!');
     return;
   }
+  if(memoType==='khoroch'){
+    openKhorochMemo();
+    return;
+  }
   let entries=[];
-  if(currentMemoType==='cash') entries=DB.cash.filter(e=>e.date===today());
+  if(memoType==='cash') entries=DB.cash.filter(e=>e.date===today());
   else if(currentMemoCustomerId){
     const c=DB.customers.find(x=>x.id===currentMemoCustomerId);
     entries=DB.baki.filter(e=>c&&e.name.toLowerCase()===c.name.toLowerCase());
   } else if(currentBillData) entries=[currentBillData.entry];
-  renderBillContent(currentMemoType, entries, note);
+  renderBillContent(memoType, entries, note);
   toast('✅ নোট যোগ হয়েছে!');
 }
 
@@ -2152,7 +2158,53 @@ function clearAllData(){
   closeModal('modal-report');
   toast('✅ সব এন্ট্রি মুছে দেওয়া হয়েছে');
 }
+function openKroyCompanyMemo(company){
+  const entries = DB.kroy.filter(e => (e.company||'').trim() === company.trim());
+  if(!entries.length){ toast('কোনো এন্ট্রি নেই!'); return; }
+  const totalKroy = entries.filter(e=>e.kroyType!=='porishod').reduce((s,e)=>s+(e.todayAmt||0),0);
+  const totalPorishod = entries.filter(e=>e.kroyType==='porishod').reduce((s,e)=>s+(e.todayAmt||0),0);
+  const netBaki = Math.max(0, totalKroy - totalPorishod);
+  const phone = entries.find(e=>e.phone)?.phone || '';
+
+  let rows = entries.sort((a,b)=>a.date.localeCompare(b.date)).map((e,i)=>`
+    <div class="bill-row" style="align-items:center;">
+      <span style="flex:1;font-size:12px;">${fmtDate(e.date)}</span>
+      <span style="font-size:11px;background:${e.kroyType==='baki'?'var(--baki-pale)':e.kroyType==='porishod'?'#d1fae5':'#dbeafe'};border-radius:4px;padding:1px 6px;color:${e.kroyType==='baki'?'var(--baki-dark)':e.kroyType==='porishod'?'#065f46':'#1e40af'};margin-right:6px;">
+        ${e.kroyType==='baki'?'বাকি ক্রয়':e.kroyType==='porishod'?'পরিশোধ':'নগদ ক্রয়'}
+      </span>
+      <span style="font-weight:800;color:${e.kroyType==='porishod'?'#065f46':'#1e40af'};">৳${(e.todayAmt||0).toLocaleString('bn-BD')}</span>
+    </div>`).join('');
+
+  const billHTML = `
+    <div class="bill-header">
+      <div style="font-size:20px;margin-bottom:4px;">💊</div>
+      <div class="bill-pharmacy">মেসার্স বিসমিল্লাহ ফার্মেসী</div>
+      <div class="bill-address">বামনসুন্দর, দারোগার হাট, মিরসরাই, চট্টগ্রাম</div>
+      <span class="bill-type-tag" style="background:#dbeafe;color:#1e40af;">🛒 ক্রয় হিসাব সামারি</span>
+    </div>
+    <div class="bill-row"><span>🏢 কোম্পানি:</span><span style="font-weight:800;">${company}</span></div>
+    ${phone?`<div class="bill-row"><span>📱 মোবাইল:</span><span>${phone}</span></div>`:''}
+    <div class="bill-row"><span>📅 তারিখ:</span><span>${fmtDate(new Date().toISOString().split('T')[0])}</span></div>
+    <div style="height:8px;"></div>
+    ${rows}
+    <div class="bill-row" style="border-top:1px dashed #bfdbfe;margin-top:6px;padding-top:6px;">
+      <span>মোট ক্রয়</span><span style="font-weight:800;color:#1e40af;">৳${totalKroy.toLocaleString('bn-BD')}</span>
+    </div>
+    <div class="bill-row"><span>মোট পরিশোধ</span><span style="font-weight:800;color:#065f46;">৳${totalPorishod.toLocaleString('bn-BD')}</span></div>
+    <div class="bill-row bill-total"><span>নেট বাকি</span><span style="color:${netBaki>0?'#dc2626':'#065f46'};">৳${netBaki.toLocaleString('bn-BD')}</span></div>
+    <div class="bill-footer">ধন্যবাদ আপনার ব্যবসায়িক সম্পর্কের জন্য 🙏</div>`;
+
+  window._currentMemoType = 'kroy_company';
+  window._currentKroyEntry = null;
+  document.getElementById('memoTitle').textContent = '🏢 ' + company;
+  document.getElementById('memoNote').value = '';
+  document.getElementById('billContent').innerHTML = billHTML;
+  openModal('modal-memo');
+}
+
 function openKhorochMemo(){
+  window._currentKroyEntry=null;
+  window._currentMemoType='khoroch';
   const today = new Date().toISOString().split('T')[0];
   const todayList = DB.khoroch.filter(e => e.date === today);
   if(todayList.length === 0){ toast('আজকের কোনো খরচ নেই!'); return; }
@@ -2541,6 +2593,11 @@ function renderKroyList(filter=''){
           :`<div style="font-size:14px;font-weight:800;color:#065f46;">✅ পরিশোধ</div>`}
         </div>
       </div>
+      <!-- কোম্পানি সামারি বাটন -->
+      <div style="padding:0 14px 10px;display:flex;gap:8px;">
+        <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;font-size:12px;flex:1;" onclick="openKroyCompanyMemo('${company.replace(/'/g,\'\'')}')">📄 সামারি মেমো</button>
+        <button class="btn btn-sm" style="background:#f0fdf4;color:#065f46;font-size:12px;flex:1;" onclick="toggleKroyGroup('${gId}')">📋 এন্ট্রি দেখুন</button>
+      </div>
       <!-- এন্ট্রি তালিকা (ভাঁজ করা) -->
       <div id="${gId}" style="display:none;border-top:1px dashed #bfdbfe;padding:8px 12px;background:#f8faff;">
         ${entries.map(e=>`
@@ -2557,7 +2614,7 @@ function renderKroyList(filter=''){
             <span style="color:var(--baki-dark);font-weight:800;">বাকি: ${taka(e.remain)}</span>
           </div>`:''}
           <div style="display:flex;gap:6px;margin-top:6px;">
-            <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;font-size:11px;" onclick="shareKroy('${e.id}')">📲 শেয়ার</button>
+            <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;font-size:11px;" onclick="shareKroy('${e.id}')">📄 মেমো</button>
             <button class="btn btn-sm btn-ghost" style="font-size:11px;" onclick="deleteEntry('kroy','${e.id}')">🗑️</button>
           </div>
         </div>`).join('')}
@@ -2653,6 +2710,7 @@ function shareKroy(id){
 
 function openKroyMemoModal(id){
   const e=DB.kroy.find(x=>x.id===id);if(!e)return;
+  window._currentMemoType='kroy';
   document.getElementById('memoNote').value='';
   renderKroyBill(e,'');
   openModal('modal-memo');
@@ -2855,7 +2913,8 @@ function buildShareLines(){
     return lines;
   }
 
-  if(currentMemoType==='cash'){
+  const mType = window._currentMemoType || currentMemoType;
+  if(mType==='cash'){
     const entries=DB.cash.filter(e=>e.date===today());
     const op=DB.opening.find(o=>o.date===today());
     lines.push('💚 *নগদ বিক্রয় মেমো*');
@@ -2871,7 +2930,7 @@ function buildShareLines(){
     const opAmt=op?(op.amount||0):0;
     lines.push(`💚 বিক্রয় মোট: ${taka(salesTotal)}`);
     lines.push(`🧾 *সর্বমোট (ক্যাশ + বিক্রয়): ${taka(opAmt+salesTotal)}*`);
-  } else if(currentMemoCustomerId||currentBillData){
+  } else if(mType==='baki'||currentMemoCustomerId||currentBillData){
     const custId=currentMemoCustomerId;
     const c=custId?DB.customers.find(x=>x.id===custId):null;
     const entry=currentBillData?.entry;
@@ -2886,6 +2945,24 @@ function buildShareLines(){
   }
   const note=document.getElementById('memoNote').value;
   if(note) lines.push(`\n📝 নোট: ${note}`);
+  if(mType==='khoroch'){
+    const todayItems = DB.khoroch.filter(e=>e.date===today());
+    lines.push('💸 *দৈনিক খরচ মেমো*');
+    lines.push(`📅 তারিখ: ${fmtDate(today())}`);
+    lines.push('');
+    todayItems.forEach((e,i)=>{
+      lines.push(`${i+1}. ${e.type||'খরচ'}: ${e.desc||''} — ${taka(e.amount)}`);
+    });
+    lines.push('━━━━━━━━━━━━━━━━');
+    lines.push(`💸 *মোট খরচ: ${taka(todayItems.reduce((s,e)=>s+(e.amount||0),0))}*`);
+    const note=document.getElementById('memoNote').value;
+    if(note) lines.push(`\n📝 নোট: ${note}`);
+    lines.push('\nধন্যবাদ 🙏');
+    return lines;
+  }
+  if(mType==='kroy'||mType==='kroy_company'){
+    // kroy share handled by buildShareLines above
+  }
   lines.push('\nধন্যবাদ 🙏');
   return lines;
 }

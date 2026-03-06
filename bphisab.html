@@ -1306,7 +1306,7 @@ function init() {
   const td = today();
   document.getElementById('headerDate').textContent = fmtDate(td);
   ['cashDate','bakiDate','openingDate','kroyDate','khorochDate'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value=td;
+    const el=document.getElementById(id); if(el){ el.value=td; el.defaultValue=td; }
   });
   const first = td.slice(0,8)+'01';
   const rf=document.getElementById('rptFrom'); if(rf) rf.value=first;
@@ -3164,7 +3164,7 @@ function toggleOpeningVisibility(){
   // Service worker via blob (caches the app for offline use)
   if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const swCode = `
-const CACHE = 'bismillah-v1';
+const CACHE = 'bismillah-v3';
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.add(self.location.href.replace(/\/sw.*$/,'/'))).catch(()=>{}));

@@ -545,15 +545,8 @@ body {
         </div>
       </div>
 
-      <!-- সারি ৪: সেভ বাটন | 📷 ক্যামেরা -->
-      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;">
-        <button class="btn btn-cash btn-full" style="font-size:15px;padding:12px;font-weight:900;" onclick="saveCash()">💾 নগদ এন্ট্রি সেভ করুন</button>
-        <div style="text-align:center;">
-          <label style="display:flex;align-items:center;justify-content:center;width:48px;height:44px;background:#d1fae5;border-radius:10px;cursor:pointer;border:2px solid var(--cash-mid);font-size:22px;">
-            📷<input type="file" accept="image/*" capture="environment" id="cashCamera" onchange="capturePhoto(this,'cashPhotoPreview')" style="display:none;">
-          </label>
-        </div>
-      </div>
+      <!-- সারি ৪: সেভ বাটন -->
+      <button class="btn btn-cash btn-full" style="font-size:15px;padding:12px;font-weight:900;" onclick="saveCash()">💾 নগদ এন্ট্রি সেভ করুন</button>
     </div>
   </div>
 
@@ -1492,14 +1485,16 @@ function capturePhoto(input, previewId) {
   const file=input.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=e=>{
+    const data = e.target.result;
+    // ছবি input এ সংরক্ষণ
+    input._photoData = data;
     const div=document.getElementById(previewId);
     div.innerHTML=`<div style="position:relative;margin-bottom:12px;">
-      <img src="${e.target.result}" class="ei-photo" style="width:100%;border-radius:10px;max-height:160px;object-fit:cover;">
-      <button onclick="this.parentElement.remove();document.getElementById('${input.id}').value=''"
-        style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;">✕</button>
+      <img src="${data}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;border:2px solid #d1fae5;">
+      <button onclick="this.parentElement.remove();document.getElementById('${input.id}')._photoData='';document.getElementById('${input.id}').value='';"
+        style="position:absolute;top:6px;right:6px;background:rgba(220,38,38,.85);color:#fff;border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;font-weight:900;">✕</button>
+      <div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;">📷 ছবি যুক্ত হয়েছে</div>
     </div>`;
-    // store temporarily
-    input._photoData = e.target.result;
   };
   reader.readAsDataURL(file);
 }

@@ -2506,39 +2506,69 @@ function renderKroyList(filter=''){
   document.getElementById('kroyBakiDisplay').textContent=taka(totalBaki);
   const list=document.getElementById('kroyEntryList');
   if(!data.length){list.innerHTML='<div class="empty"><div class="e-icon">🛒</div><p>কোনো ক্রয় নেই</p></div>';return;}
-  const groups={};
-  data.forEach(e=>{const k=(e.company||'অজানা').slice(0,1).toUpperCase();if(!groups[k])groups[k]=[];groups[k].push(e);});
-  list.innerHTML=Object.keys(groups).sort().map(letter=>`
-    <div class="alpha-divider">
-      <div class="alpha-circle" style="background:#1e40af;">${letter}</div>
-      <div class="alpha-line"></div>
-    </div>
-    ${groups[letter].map(e=>`
-    <div class="entry-item" style="border-left-color:#1e40af;">
-      <div class="ei-top">
-        <div class="ei-main">
-          <div class="ei-title" style="color:#1e40af;">${e.company}</div>
-          <div class="ei-meta">
-            <span>📅 ${fmtDate(e.date)}</span>
-            ${e.phone?`<span><a href="tel:${e.phone}" style="color:#1e40af;text-decoration:none;">📱 ${e.phone}</a></span>`:''}
-            <span style="background:${e.kroyType==='baki'?'var(--baki-pale)':e.kroyType==='porishod'?'#d1fae5':'#dbeafe'};border-radius:6px;padding:1px 7px;font-weight:700;color:${e.kroyType==='baki'?'var(--baki-dark)':e.kroyType==='porishod'?'#065f46':'#1e40af'};">${e.kroyType==='baki'?'🔴 বাকি':e.kroyType==='porishod'?'💳 পরিশোধ':'💵 নগদ'}</span>
+
+  // কোম্পানি অনুযায়ী গ্রুপ করো
+  const companyGroups={};
+  data.forEach(e=>{
+    const k=(e.company||'অজানা').trim();
+    if(!companyGroups[k]) companyGroups[k]={entries:[],phone:e.phone||'',totalBaki:0,totalPorishod:0,totalKroy:0};
+    companyGroups[k].entries.push(e);
+    if(e.kroyType==='baki') companyGroups[k].totalBaki+=(e.todayAmt||0);
+    if(e.kroyType==='porishod') companyGroups[k].totalPorishod+=(e.todayAmt||0);
+    companyGroups[k].totalKroy+=(e.todayAmt||0);
+    if(e.phone) companyGroups[k].phone=e.phone;
+  });
+
+  list.innerHTML=Object.keys(companyGroups).sort().map(company=>{
+    const g=companyGroups[company];
+    const totalBaki=Math.max(0, g.totalBaki - g.totalPorishod);
+    const entries=g.entries;
+    const isExpanded=false;
+    const gId='grp_'+company.replace(/[^a-z0-9]/gi,'_');
+    return `
+    <div class="entry-item" style="border-left-color:#1e40af;padding:0;overflow:hidden;">
+      <!-- কোম্পানি হেডার -->
+      <div onclick="toggleKroyGroup('${gId}')" style="padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#1e40af;">${company}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+            ${g.phone?`📱 ${g.phone} · `:''}${entries.length}টি এন্ট্রি
           </div>
         </div>
-        <div class="ei-right">
-          <div class="ei-amount" style="color:#1e40af;">${taka(e.todayAmt)}</div>
-          ${e.kroyType==='baki'?`<span class="ei-badge" style="background:var(--baki-pale);color:var(--baki-dark);">${e.remain>0?'বাকি':'পরিশোধ'}</span>`:''}
+        <div style="text-align:right;">
+          ${totalBaki>0?`<div style="font-size:16px;font-weight:900;color:var(--baki-dark);">৳${totalBaki.toLocaleString('bn-BD')}</div>
+          <div style="font-size:11px;font-weight:700;background:var(--baki-pale);color:var(--baki-dark);padding:2px 8px;border-radius:20px;">বাকি আছে</div>`
+          :`<div style="font-size:14px;font-weight:800;color:#065f46;">✅ পরিশোধ</div>`}
         </div>
       </div>
-      ${e.kroyType==='baki'&&e.remain>0?`<div style="margin-top:6px;display:flex;justify-content:space-between;font-size:12px;padding:6px 8px;background:var(--baki-pale);border-radius:8px;">
-        <span>পূর্বের: ${taka(e.prev)}</span><span>জমা: ${taka(e.joma)}</span>
-        <span style="color:var(--baki-dark);font-weight:800;">বাকি: ${taka(e.remain)}</span>
-      </div>`:''}
-      ${e.photo?`<img src="${e.photo}" class="ei-photo">`:''}
-      <div class="ei-actions">
-        <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;" onclick="shareKroy('${e.id}')">📲 শেয়ার</button>
-        <button class="btn btn-sm btn-ghost" onclick="deleteEntry('kroy','${e.id}')">🗑️</button>
+      <!-- এন্ট্রি তালিকা (ভাঁজ করা) -->
+      <div id="${gId}" style="display:none;border-top:1px dashed #bfdbfe;padding:8px 12px;background:#f8faff;">
+        ${entries.map(e=>`
+        <div style="padding:8px;margin-bottom:6px;background:#fff;border-radius:8px;border:1px solid #dbeafe;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <span style="font-size:11px;color:var(--muted);">📅 ${fmtDate(e.date)}</span>
+              <span style="margin-left:6px;font-size:11px;background:${e.kroyType==='baki'?'var(--baki-pale)':e.kroyType==='porishod'?'#d1fae5':'#dbeafe'};border-radius:6px;padding:1px 7px;font-weight:700;color:${e.kroyType==='baki'?'var(--baki-dark)':e.kroyType==='porishod'?'#065f46':'#1e40af'};">${e.kroyType==='baki'?'🔴 বাকি':e.kroyType==='porishod'?'💳 পরিশোধ':'💵 নগদ'}</span>
+            </div>
+            <div style="font-size:14px;font-weight:800;color:#1e40af;">৳${(e.todayAmt||0).toLocaleString('bn-BD')}</div>
+          </div>
+          ${e.kroyType==='baki'?`<div style="margin-top:4px;display:flex;justify-content:space-between;font-size:11px;padding:4px 6px;background:var(--baki-pale);border-radius:6px;">
+            <span>পূর্বের: ${taka(e.prev)}</span><span>জমা: ${taka(e.joma)}</span>
+            <span style="color:var(--baki-dark);font-weight:800;">বাকি: ${taka(e.remain)}</span>
+          </div>`:''}
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;font-size:11px;" onclick="shareKroy('${e.id}')">📲 শেয়ার</button>
+            <button class="btn btn-sm btn-ghost" style="font-size:11px;" onclick="deleteEntry('kroy','${e.id}')">🗑️</button>
+          </div>
+        </div>`).join('')}
       </div>
-    </div>`).join('')}`).join('');
+    </div>`;
+  }).join('');
+}
+
+function toggleKroyGroup(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
 }
 function filterKroyList(v){renderKroyList(v);}
 

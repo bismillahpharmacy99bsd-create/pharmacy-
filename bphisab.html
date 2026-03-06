@@ -2158,7 +2158,8 @@ function clearAllData(){
   closeModal('modal-report');
   toast('✅ সব এন্ট্রি মুছে দেওয়া হয়েছে');
 }
-function openKroyCompanyMemo(company){
+function openKroyCompanyMemo(btn){
+  const company = btn ? (btn.dataset ? btn.dataset.company : btn) : btn;
   const entries = DB.kroy.filter(e => (e.company||'').trim() === company.trim());
   if(!entries.length){ toast('কোনো এন্ট্রি নেই!'); return; }
   const totalKroy = entries.filter(e=>e.kroyType!=='porishod').reduce((s,e)=>s+(e.todayAmt||0),0);
@@ -2595,7 +2596,7 @@ function renderKroyList(filter=''){
       </div>
       <!-- কোম্পানি সামারি বাটন -->
       <div style="padding:0 14px 10px;display:flex;gap:8px;">
-        <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;font-size:12px;flex:1;" onclick="openKroyCompanyMemo('${company.replace(/'/g,\'\'')}')">📄 সামারি মেমো</button>
+        <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;font-size:12px;flex:1;" onclick="openKroyCompanyMemo(this)" data-company="${company}">📄 সামারি মেমো</button>
         <button class="btn btn-sm" style="background:#f0fdf4;color:#065f46;font-size:12px;flex:1;" onclick="toggleKroyGroup('${gId}')">📋 এন্ট্রি দেখুন</button>
       </div>
       <!-- এন্ট্রি তালিকা (ভাঁজ করা) -->

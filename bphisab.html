@@ -758,7 +758,7 @@ body {
     </div>
     <button onclick="toggleSection('companyList')"
       style="padding:10px 14px;border-radius:12px;border:2px solid #93c5fd;background:#eff6ff;color:#1e40af;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;">
-      দেখুন/লুকান <span id="companyListCount" style="background:#1e40af;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px;">০</span>
+      নামের তালিকা 👁️ <span id="companyListCount" style="background:#1e40af;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px;">০</span>
     </button>
   </div>
 
@@ -767,18 +767,18 @@ body {
     <div id="companyListItems" style="max-height:300px;overflow-y:auto;"></div>
   </div>
 
-  <!-- ক্রয় টাইপ টগল -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+  <!-- ক্রয় টাইপ টগল — ফর্মের উপরে সংক্ষিপ্ত -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
     <button id="kroy-type-nagod" onclick="setKroyType('nagod')"
-      style="padding:10px 4px;border-radius:10px;border:2px solid #1e40af;background:#1e40af;color:#fff;font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;">
-      💵 নগদ ক্রয়
+      style="padding:8px 4px;border-radius:10px;border:2px solid #1e40af;background:#1e40af;color:#fff;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;">
+      💵 নগদ
     </button>
     <button id="kroy-type-baki" onclick="setKroyType('baki')"
-      style="padding:10px 4px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;">
-      🔴 বাকি ক্রয়
+      style="padding:8px 4px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;">
+      🔴 বাকি
     </button>
     <button id="kroy-type-porishod" onclick="setKroyType('porishod')"
-      style="padding:10px 4px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;">
+      style="padding:8px 4px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;">
       💳 পরিশোধ
     </button>
   </div>
@@ -3288,12 +3288,26 @@ function toggleOpeningVisibility(){
   const manifestDataURI = 'data:application/manifest+json,' + encodeURIComponent(manifestStr);
   document.getElementById('pwa-manifest').href = manifestDataURI;
 
-  // পুরনো Service Worker মুছে দাও
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.getRegistrations().then(regs=>{
-      regs.forEach(r=>r.unregister());
-    });
-    caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+  // Service Worker — PWA Install এর জন্য দরকার
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    const swCode = `
+const CACHE = 'bismillah-v5';
+self.addEventListener('install', e => {
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== 'bismillah-v5').map(k => caches.delete(k))
+    )).then(() => clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+});`;
+    const swBlob = new Blob([swCode], {type:'application/javascript'});
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
   }
 })();
 

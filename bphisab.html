@@ -584,6 +584,13 @@ body {
         <button class="btn btn-sm btn-gold" style="width:100%; margin-top:10px;" onclick="openMemoModal('cash')">📄 আজকের মেমো তৈরি করুন</button>
       </div>
 
+      <!-- ফিল্টার ট্যাব -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px;">
+        <button onclick="setCashFilter('today')" id="cf-today" class="filter-tab active-tab">আজ</button>
+        <button onclick="setCashFilter('week')" id="cf-week" class="filter-tab">সপ্তাহ</button>
+        <button onclick="setCashFilter('month')" id="cf-month" class="filter-tab">মাস</button>
+        <button onclick="setCashFilter('year')" id="cf-year" class="filter-tab">বছর</button>
+      </div>
       <div class="search-box">
         <span>🔍</span>
         <input type="text" placeholder="বিবরণ বা তারিখ দিয়ে খুঁজুন..." oninput="filterCashList(this.value)">
@@ -944,6 +951,13 @@ body {
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="kroyCountDisplay">০টি এন্ট্রি</div>
       </div>
+      <!-- ফিল্টার ট্যাব -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px;">
+        <button onclick="setKroyFilter('all')" id="kf-all" class="filter-tab active-tab">সব</button>
+        <button onclick="setKroyFilter('month')" id="kf-month" class="filter-tab">মাস</button>
+        <button onclick="setKroyFilter('baki')" id="kf-baki" class="filter-tab">বাকি</button>
+        <button onclick="setKroyFilter('porishod')" id="kf-porishod" class="filter-tab">পরিশোধ</button>
+      </div>
       <div class="search-box">
         <span>🔍</span>
         <input type="text" placeholder="কোম্পানির নামে খুঁজুন..." oninput="filterKroyList(this.value)">
@@ -1046,6 +1060,14 @@ body {
           <div style="font-size:14px;font-weight:800;color:#92400e;">মোট খরচ</div>
           <div style="font-size:20px;font-weight:900;color:#92400e;" id="khorochTotalDisplay">৳ ০</div>
         </div>
+      </div>
+
+      <!-- ফিল্টার ট্যাব -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px;">
+        <button onclick="setKhorochFilter('today')" id="khf-today" class="filter-tab active-tab">আজ</button>
+        <button onclick="setKhorochFilter('week')" id="khf-week" class="filter-tab">সপ্তাহ</button>
+        <button onclick="setKhorochFilter('month')" id="khf-month" class="filter-tab">মাস</button>
+        <button onclick="setKhorochFilter('year')" id="khf-year" class="filter-tab">বছর</button>
       </div>
 
       <!-- আজকের মেমো বাটন -->
@@ -1249,7 +1271,36 @@ body {
         <input type="date" class="inp" id="rptTo">
       </div>
     </div>
-    <button class="btn btn-dark btn-full" style="margin-bottom:12px;" onclick="generateReport()">📊 রিপোর্ট তৈরি করুন</button>
+    <!-- দিনশেষ সারসংক্ষেপ -->
+    <div style="background:linear-gradient(135deg,#1e3a8a,#1e40af);border-radius:14px;padding:12px;margin-bottom:12px;color:#fff;">
+      <div style="font-size:14px;font-weight:900;margin-bottom:10px;text-align:center;">📊 দিনশেষ সারসংক্ষেপ</div>
+      <div id="dailySummary">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:11px;opacity:.8;">💚 নগদ বিক্রয়</div>
+            <div style="font-size:18px;font-weight:900;" id="sum-cash">৳ ০</div>
+          </div>
+          <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:11px;opacity:.8;">❤️ বাকি বিক্রয়</div>
+            <div style="font-size:18px;font-weight:900;" id="sum-baki">৳ ০</div>
+          </div>
+          <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:11px;opacity:.8;">🛒 মোট ক্রয়</div>
+            <div style="font-size:18px;font-weight:900;" id="sum-kroy">৳ ০</div>
+          </div>
+          <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center;">
+            <div style="font-size:11px;opacity:.8;">💸 মোট খরচ</div>
+            <div style="font-size:18px;font-weight:900;" id="sum-khoroch">৳ ০</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;font-weight:900;">💰 নেট লাভ/ক্ষতি</div>
+          <div style="font-size:22px;font-weight:900;" id="sum-net">৳ ০</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-dark btn-full" style="margin-bottom:12px;" onclick="generateReport()">📊 বিস্তারিত রিপোর্ট তৈরি করুন</button>
     <div id="reportContent"></div>
 
     <!-- ══ সব ডেটা মুছুন ══ -->
@@ -1626,8 +1677,64 @@ function addCustomer() {
 // ════════════════════════════════════════════
 //  RENDER CASH LIST
 // ════════════════════════════════════════════
+
+// ════════════════════════════════════════════
+//  ফিল্টার ফাংশন — তারিখ ভিত্তিক
+// ════════════════════════════════════════════
+let _cashFilter = 'today';
+let _kroyFilter = 'all';
+let _khorochFilter = 'today';
+
+function getDateRange(filter){
+  const t = today();
+  const d = new Date(t);
+  if(filter==='today') return {from:t, to:t};
+  if(filter==='week'){
+    const day = d.getDay(); // 0=Sun
+    const mon = new Date(d); mon.setDate(d.getDate()-((day+6)%7));
+    const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+    return {from:mon.toISOString().split('T')[0], to:sun.toISOString().split('T')[0]};
+  }
+  if(filter==='month') return {from:t.slice(0,8)+'01', to:t};
+  if(filter==='year') return {from:t.slice(0,5)+'01-01', to:t};
+  return {from:null, to:null};
+}
+
+function inRange(date, from, to){
+  if(!from) return true;
+  return date >= from && date <= to;
+}
+
+function setCashFilter(f){
+  _cashFilter=f;
+  ['today','week','month','year'].forEach(x=>{
+    const el=document.getElementById('cf-'+x);
+    if(el) el.classList.toggle('active-tab', x===f);
+  });
+  renderCashList();
+}
+
+function setKroyFilter(f){
+  _kroyFilter=f;
+  ['all','month','baki','porishod'].forEach(x=>{
+    const el=document.getElementById('kf-'+x);
+    if(el) el.classList.toggle('active-tab', x===f);
+  });
+  renderKroyList();
+}
+
+function setKhorochFilter(f){
+  _khorochFilter=f;
+  ['today','week','month','year'].forEach(x=>{
+    const el=document.getElementById('khf-'+x);
+    if(el) el.classList.toggle('active-tab', x===f);
+  });
+  renderKhorochList();
+}
+
 function renderCashList(filter='') {
-  let data=DB.cash;
+  const {from,to}=getDateRange(_cashFilter);
+  let data=DB.cash.filter(e=>inRange(e.date,from,to));
   if(filter) data=data.filter(e=>(e.desc||'').toLowerCase().includes(filter.toLowerCase())||e.date.includes(filter));
   const total=data.reduce((s,e)=>s+(e.total||0),0);
   // Opening cash for today
@@ -2252,9 +2359,26 @@ function openKhorochMemo(){
   openModal('modal-memo');
 }
 
+
+function updateDailySummary(){
+  const td = today();
+  const cashTotal = DB.cash.filter(e=>e.date===td).reduce((s,e)=>s+(e.total||0),0);
+  const bakiTotal = DB.baki.filter(e=>e.date===td).reduce((s,e)=>s+(e.todayBaki||0),0);
+  const kroyTotal = DB.kroy.filter(e=>e.date===td&&e.kroyType!=='porishod').reduce((s,e)=>s+(e.todayAmt||0),0);
+  const khorochTotal = DB.khoroch.filter(e=>e.date===td).reduce((s,e)=>s+(e.amount||0),0);
+  const net = cashTotal + bakiTotal - kroyTotal - khorochTotal;
+  const set = (id,val,color)=>{ const el=document.getElementById(id); if(el){el.textContent=taka(val);if(color)el.style.color=color;} };
+  set('sum-cash', cashTotal);
+  set('sum-baki', bakiTotal);
+  set('sum-kroy', kroyTotal);
+  set('sum-khoroch', khorochTotal);
+  set('sum-net', net, net>=0?'#86efac':'#fca5a5');
+}
+
 function openReportModal(){
   openModal('modal-report');
   updateLastBackupInfo();
+  updateDailySummary();
   const savedEmail = localStorage.getItem('backupEmail');
   if(savedEmail){ const el=document.getElementById('backupEmail'); if(el) el.value=savedEmail; }
 }
@@ -2550,6 +2674,7 @@ function saveKroy(){
 }
 
 function renderKroyList(filter=''){
+  const {from:krFrom,to:krTo}=getDateRange(_kroyFilter==='all'||_kroyFilter==='baki'||_kroyFilter==='porishod'?'all':'month');
   let data=DB.kroy;
   if(filter)data=data.filter(e=>(e.company||'').toLowerCase().includes(filter.toLowerCase()));
   const total=data.reduce((s,e)=>s+(e.todayAmt||0),0);
@@ -2800,7 +2925,8 @@ function saveKhoroch(){
 }
 
 function renderKhorochList(filter=''){
-  let data=DB.khoroch;
+  const {from:khFrom,to:khTo}=getDateRange(_khorochFilter);
+  let data=DB.khoroch.filter(e=>inRange(e.date,khFrom,khTo));
   if(filter) data=data.filter(e=>(e.desc||'').toLowerCase().includes(filter.toLowerCase())||e.date.includes(filter));
   const total=data.reduce((s,e)=>s+(e.amount||0),0);
   document.getElementById('khorochTotalDisplay').textContent=taka(total);

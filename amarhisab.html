@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>আমার হিসাব</title>
+<meta name="theme-color" content="#0f172a">
+<link id="pwa-manifest" rel="manifest">
+<script>
+(function(){
+  var icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs><rect width="192" height="192" rx="38" fill="url(#bg)"/><rect x="52" y="24" width="104" height="140" rx="12" fill="#fff" opacity="0.95"/><rect x="36" y="30" width="22" height="128" rx="11" fill="#0f172a" opacity="0.7"/><rect x="44" y="30" width="8" height="128" rx="4" fill="#f59e0b"/><rect x="68" y="52" width="72" height="8" rx="4" fill="#0f172a" opacity="0.7"/><rect x="68" y="70" width="56" height="6" rx="3" fill="#64748b"/><rect x="68" y="84" width="62" height="6" rx="3" fill="#64748b"/><rect x="68" y="98" width="50" height="6" rx="3" fill="#10b981"/><rect x="68" y="112" width="58" height="6" rx="3" fill="#64748b"/><rect x="68" y="126" width="44" height="6" rx="3" fill="#ef4444"/><rect x="20" y="155" width="152" height="24" rx="12" fill="#0f172a" opacity="0.5"/><text x="96" y="172" font-size="15" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="bold">আমার হিসাব</text></svg>';
+  var iconUrl='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(icon)));
+  var m={name:'আমার হিসাব',short_name:'হিসাব',description:'ব্যক্তিগত হিসাব খাতা',start_url:'./amarhisab.html',display:'standalone',background_color:'#0f172a',theme_color:'#0f172a',orientation:'portrait',icons:[{src:iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},{src:iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+  var blob=new Blob([JSON.stringify(m)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(blob);
+})();
+</script>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="আমার হিসাব">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;
+  --card:#1e293b;--card2:#263248;
+  --ink:#f1f5f9;--ink2:#94a3b8;--ink3:#64748b;
+  --green:#10b981;--green-l:#d1fae5;--green-d:#065f46;
+  --red:#ef4444;--red-l:#fee2e2;--red-d:#991b1b;
+  --blue:#3b82f6;--blue-l:#dbeafe;--blue-d:#1e40af;
+  --amber:#f59e0b;--amber-l:#fef3c7;--amber-d:#92400e;
+  --purple:#8b5cf6;--purple-l:#ede9fe;--purple-d:#5b21b6;
+  --r:14px;--r-sm:10px;
+  --shadow:0 4px 20px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);font-family:'Noto Sans Bengali',sans-serif;color:var(--ink);overflow:hidden;}
+
+/* ══ LAYOUT ══ */
+.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;position:relative;}
+.header{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:14px 16px 12px;border-bottom:1px solid #334155;flex-shrink:0;}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;}
+.hdr-logo{display:flex;align-items:center;gap:10px;}
+.hdr-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--green),var(--blue));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(16,185,129,.3);}
+.hdr-title{font-size:18px;font-weight:900;color:var(--ink);}
+.hdr-sub{font-size:11px;color:var(--ink2);}
+.hdr-date{background:#334155;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--green);}
+
+.pages{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:80px;}
+.page{display:none;padding:12px;}
+.page.active{display:block;}
+
+/* ══ BOTTOM NAV ══ */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid #334155;display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px 10px;z-index:100;}
+.bn-btn{display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;color:var(--ink3);cursor:pointer;font-family:inherit;padding:4px 2px;border-radius:10px;transition:all .2s;}
+.bn-btn.active{color:var(--green);}
+.bn-btn .bn-icon{font-size:22px;line-height:1;}
+.bn-btn .bn-label{font-size:10px;font-weight:700;}
+
+/* ══ CARDS ══ */
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;border:1px solid #334155;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.card-title{font-size:14px;font-weight:800;color:var(--ink);}
+.card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+
+/* ══ SUMMARY STRIP ══ */
+.summary-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.sum-box{background:var(--card2);border-radius:var(--r-sm);padding:12px;border:1px solid #334155;}
+.sum-label{font-size:11px;color:var(--ink2);font-weight:600;margin-bottom:4px;}
+.sum-val{font-size:18px;font-weight:900;}
+
+/* ══ FORM FIELDS ══ */
+.field{margin-bottom:10px;}
+.label{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.inp{width:100%;background:#263248;border:1.5px solid #334155;border-radius:var(--r-sm);padding:10px 12px;color:var(--ink);font-family:inherit;font-size:14px;font-weight:600;outline:none;-webkit-appearance:none;}
+.inp:focus{border-color:var(--blue);background:#1e2d45;}
+.inp::placeholder{color:var(--ink3);}
+.inp[readonly]{background:#1a2540;color:var(--ink2);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+/* ══ BUTTONS ══ */
+.btn{border:none;border-radius:var(--r-sm);padding:11px 16px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
+.btn-full{width:100%;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-amber{background:var(--amber);color:#fff;}
+.btn-ghost{background:#334155;color:var(--ink);}
+.btn-sm{padding:6px 10px;font-size:11px;border-radius:8px;}
+
+/* ══ TYPE TABS ══ */
+.type-tabs{display:grid;gap:6px;margin-bottom:12px;}
+.type-tabs.t2{grid-template-columns:1fr 1fr;}
+.type-tabs.t3{grid-template-columns:1fr 1fr 1fr;}
+.ttab{padding:9px 4px;border-radius:10px;border:2px solid #334155;background:var(--card2);color:var(--ink2);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:all .2s;}
+.ttab.active{border-color:var(--green);background:var(--green);color:#fff;}
+
+/* ══ ENTRY LIST ══ */
+.entry-item{background:var(--card2);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;border:1px solid #334155;border-left:3px solid var(--blue);}
+.ei-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.ei-left{flex:1;}
+.ei-title{font-size:14px;font-weight:800;color:var(--ink);}
+.ei-sub{font-size:11px;color:var(--ink2);margin-top:2px;}
+.ei-amt{font-size:16px;font-weight:900;text-align:right;}
+.ei-date{font-size:10px;color:var(--ink3);margin-top:2px;}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-right:4px;}
+
+/* ══ FILTER TABS ══ */
+.ftabs{display:grid;gap:4px;margin-bottom:12px;}
+.ftabs.f4{grid-template-columns:repeat(4,1fr);}
+.ftabs.f3{grid-template-columns:repeat(3,1fr);}
+.ftab{padding:6px 4px;border-radius:8px;border:1.5px solid #334155;background:var(--card2);color:var(--ink3);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;text-align:center;}
+.ftab.active{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.1);}
+
+/* ══ PROGRESS BAR ══ */
+.pbar-wrap{background:#334155;border-radius:100px;height:8px;overflow:hidden;margin-top:6px;}
+.pbar-fill{height:100%;border-radius:100px;transition:width .4s;}
+
+/* ══ MODAL ══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 16px 30px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s;}
+.modal-bg.open .modal{transform:translateY(0);}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-title{font-size:16px;font-weight:900;}
+.modal-close{background:#334155;border:none;color:var(--ink);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ══ MEMO ══ */
+.memo-wrap{background:#fff;color:#1a1a2e;border-radius:var(--r);padding:16px;font-family:'Noto Sans Bengali',sans-serif;}
+.memo-title-main{font-size:17px;font-weight:900;color:#0f4c2e;text-align:center;}
+.memo-addr{font-size:11px;color:#555;text-align:center;margin:2px 0 8px;}
+.memo-section{font-size:12px;font-weight:800;color:#1e40af;border-bottom:1.5px solid #bfdbfe;padding-bottom:3px;margin:10px 0 6px;}
+.memo-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #e5e7eb;font-size:13px;}
+.memo-total{display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:900;border-top:2px solid #1e40af;margin-top:6px;}
+
+/* ══ AUTOCOMPLETE ══ */
+.ac-wrap{position:relative;}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1.5px solid var(--blue);border-radius:var(--r-sm);z-index:50;max-height:160px;overflow-y:auto;display:none;}
+.ac-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #334155;}
+.ac-item:hover{background:#334155;}
+
+/* ══ TOAST ══ */
+.toast-el{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:#10b981;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+.toast-el.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ BACKUP BADGE ══ */
+.backup-badge{background:rgba(245,158,11,.15);border:1px solid var(--amber);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+
+/* ══ EMPTY ══ */
+.empty{text-align:center;padding:40px 20px;color:var(--ink3);}
+.empty-icon{font-size:48px;margin-bottom:10px;}
+.empty-text{font-size:14px;}
+
+/* ══ LOAN CARD ══ */
+.loan-card{background:var(--card2);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;border:1px solid #334155;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:10px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ HEADER ══ -->
+<div class="header">
+  <div class="hdr-row">
+    <div class="hdr-logo">
+      <div class="hdr-icon">📒</div>
+      <div>
+        <div class="hdr-title">আমার হিসাব</div>
+        <div class="hdr-sub" id="hdr-user-name">ব্যক্তিগত হিসাব খাতা</div>
+      </div>
+    </div>
+    <div class="hdr-date" id="hdr-date"></div>
+  </div>
+</div>
+
+<!-- ══ PAGES ══ -->
+<div class="pages">
+
+  <!-- ১. খরচ PAGE -->
+  <div class="page active" id="page-khoroch">
+    <div class="summary-strip">
+      <div class="sum-box">
+        <div class="sum-label">📅 আজকের খরচ</div>
+        <div class="sum-val" style="color:var(--red);" id="sk-today">৳ ০</div>
+      </div>
+      <div class="sum-box">
+        <div class="sum-label">📆 মাসের খরচ</div>
+        <div class="sum-val" style="color:var(--amber);" id="sk-month">৳ ০</div>
+      </div>
+    </div>
+
+    <!-- বাজেট বার -->
+    <div class="card" id="budget-card" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:700;color:var(--ink2);">🎯 মাসিক বাজেট</span>
+        <span style="font-size:13px;font-weight:900;" id="budget-info">০ / ০</span>
+      </div>
+      <div class="pbar-wrap"><div class="pbar-fill" id="budget-bar" style="width:0%;background:var(--green);"></div></div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:4px;" id="budget-remain"></div>
+    </div>
+
+    <!-- এন্ট্রি ফর্ম -->
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="card-icon" style="background:rgba(239,68,68,.15);">💸</div>
+          <div class="card-title">নতুন খরচ এন্ট্রি</div>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📅 তারিখ</div>
+          <input type="date" class="inp" id="kh-date">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📂 খরচের ধরন *</div>
+          <div class="ac-wrap">
+            <input type="text" class="inp" id="kh-type" placeholder="বাজার, বিল..." autocomplete="off" oninput="acKhType(this)">
+            <div class="ac-list" id="ac-kh-type"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">📝 বিবরণ</div>
+        <input type="text" class="inp" id="kh-desc" placeholder="বিস্তারিত লিখুন..." autocomplete="off">
+      </div>
+
+      <div class="row2" style="margin-bottom:12px;">
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">💰 টাকা *</div>
+          <input type="number" class="inp" id="kh-amount" placeholder="০" style="font-size:20px;font-weight:900;color:var(--red);text-align:center;">
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;">
+          <div class="label">📷 ছবি</div>
+          <label style="display:flex;align-items:center;justify-content:center;height:42px;background:#263248;border:1.5px solid #334155;border-radius:var(--r-sm);cursor:pointer;font-size:20px;">
+            📷<input type="file" accept="image/*" capture="environment" id="kh-camera" onchange="captureKhPhoto(this)" style="display:none;">
+          </label>
+        </div>
+      </div>
+
+      <div id="kh-photo-preview" style="display:none;margin-bottom:10px;">
+        <img id="kh-photo-thumb" src="" onclick="zoomPhoto('kh-photo-zoom')" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:2px solid #334155;cursor:pointer;">
+        <span style="font-size:10px;color:var(--ink3);margin-left:6px;">ট্যাপে বড় হবে</span>
+      </div>
+
+      <button class="btn btn-full btn-red" onclick="saveKhoroch()">💾 খরচ সেভ করুন</button>
+    </div>
+
+    <!-- ফিল্টার -->
+    <div class="ftabs f4">
+      <button class="ftab active" id="kf-today" onclick="setKhFilter('today')">আজ</button>
+      <button class="ftab" id="kf-week" onclick="setKhFilter('week')">সপ্তাহ</button>
+      <button class="ftab" id="kf-month" onclick="setKhFilter('month')">মাস</button>
+      <button class="ftab" id="kf-all" onclick="setKhFilter('all')">সব</button>
+    </div>
+
+    <div id="kh-list"></div>
+  </div>
+
+  <!-- ২. আয় PAGE -->
+  <div class="page" id="page-income">
+    <div class="summary-strip">
+      <div class="sum-box">
+        <div class="sum-label">📅 এই মাসের আয়</div>
+        <div class="sum-val" style="color:var(--green);" id="si-month">৳ ০</div>
+      </div>
+      <div class="sum-box">
+        <div class="sum-label">📊 নেট সাশ্রয়</div>
+        <div class="sum-val" id="si-net">৳ ০</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="card-icon" style="background:rgba(16,185,129,.15);">💰</div>
+          <div class="card-title">নতুন আয় এন্ট্রি</div>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📅 তারিখ</div>
+          <input type="date" class="inp" id="in-date">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📂 আয়ের উৎস *</div>
+          <div class="ac-wrap">
+            <input type="text" class="inp" id="in-source" placeholder="বেতন, ব্যবসা..." autocomplete="off" oninput="acInSource(this)">
+            <div class="ac-list" id="ac-in-source"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">📝 বিবরণ</div>
+        <input type="text" class="inp" id="in-desc" placeholder="বিস্তারিত লিখুন...">
+      </div>
+
+      <div class="field" style="margin-bottom:12px;">
+        <div class="label">💰 পরিমাণ *</div>
+        <input type="number" class="inp" id="in-amount" placeholder="০" style="font-size:22px;font-weight:900;color:var(--green);text-align:center;">
+      </div>
+
+      <button class="btn btn-full btn-green" onclick="saveIncome()">💾 আয় সেভ করুন</button>
+    </div>
+
+    <div class="ftabs f4">
+      <button class="ftab active" id="if-today" onclick="setInFilter('today')">আজ</button>
+      <button class="ftab" id="if-week" onclick="setInFilter('week')">সপ্তাহ</button>
+      <button class="ftab" id="if-month" onclick="setInFilter('month')">মাস</button>
+      <button class="ftab" id="if-all" onclick="setInFilter('all')">সব</button>
+    </div>
+
+    <div id="in-list"></div>
+  </div>
+
+  <!-- ৩. ধার PAGE -->
+  <div class="page" id="page-loan">
+    <div class="summary-strip">
+      <div class="sum-box">
+        <div class="sum-label">📤 আমি দিয়েছি</div>
+        <div class="sum-val" style="color:var(--blue);" id="sl-given">৳ ০</div>
+      </div>
+      <div class="sum-box">
+        <div class="sum-label">📥 আমি নিয়েছি</div>
+        <div class="sum-val" style="color:var(--red);" id="sl-taken">৳ ০</div>
+      </div>
+    </div>
+
+    <div class="type-tabs t2" style="margin-bottom:12px;">
+      <button class="ttab active" id="lt-given" onclick="setLoanType('given')">📤 ধার দিয়েছি</button>
+      <button class="ttab" id="lt-taken" onclick="setLoanType('taken')">📥 ধার নিয়েছি</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="card-icon" id="loan-icon" style="background:rgba(59,130,246,.15);">📤</div>
+          <div class="card-title" id="loan-form-title">ধার দেওয়ার এন্ট্রি</div>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📅 তারিখ</div>
+          <input type="date" class="inp" id="ln-date">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">👤 নাম *</div>
+          <input type="text" class="inp" id="ln-name" placeholder="নাম লিখুন...">
+        </div>
+      </div>
+      <div class="row2" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📱 মোবাইল</div>
+          <input type="tel" class="inp" id="ln-phone" placeholder="০১XXXXXXXXX">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">💰 পরিমাণ *</div>
+          <input type="number" class="inp" id="ln-amount" placeholder="০" style="font-size:18px;font-weight:900;text-align:center;color:var(--blue);">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <div class="label">📝 কারণ / বিবরণ</div>
+        <input type="text" class="inp" id="ln-desc" placeholder="কেন ধার দিলেন...">
+      </div>
+      <button class="btn btn-full btn-blue" id="loan-save-btn" onclick="saveLoan()">💾 ধার সেভ করুন</button>
+    </div>
+
+    <!-- ধার পরিশোধ -->
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="card-icon" style="background:rgba(16,185,129,.15);">✅</div>
+          <div class="card-title">পরিশোধ রেকর্ড</div>
+        </div>
+      </div>
+      <div class="row2" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">👤 নাম</div>
+          <div class="ac-wrap">
+            <input type="text" class="inp" id="lp-name" placeholder="নাম..." autocomplete="off" oninput="acLoanName(this)" onchange="loadLoanBalance()">
+            <div class="ac-list" id="ac-lp-name"></div>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="label">📌 বর্তমান বাকি</div>
+          <input type="number" class="inp" id="lp-current" readonly placeholder="০" style="color:var(--red);text-align:center;font-weight:900;">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <div class="label">💳 পরিশোধের পরিমাণ *</div>
+        <input type="number" class="inp" id="lp-amount" placeholder="০" oninput="calcLoanRemain()" style="font-size:20px;font-weight:900;color:var(--green);text-align:center;">
+      </div>
+      <button class="btn btn-full btn-green" onclick="saveLoanPayment()">💳 পরিশোধ সেভ করুন</button>
+    </div>
+
+    <div id="ln-list"></div>
+  </div>
+
+  <!-- ৪. সঞ্চয় PAGE -->
+  <div class="page" id="page-savings">
+    <div class="summary-strip">
+      <div class="sum-box">
+        <div class="sum-label">🏦 মোট সঞ্চয়</div>
+        <div class="sum-val" style="color:var(--green);" id="ss-total">৳ ০</div>
+      </div>
+      <div class="sum-box">
+        <div class="sum-label">🎯 লক্ষ্যমাত্রা</div>
+        <div class="sum-val" style="color:var(--purple);" id="ss-goal">সেট নেই</div>
+      </div>
+    </div>
+
+    <!-- লক্ষ্য বার -->
+    <div class="card" id="goal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:700;color:var(--ink2);">🎯 লক্ষ্য অর্জন</span>
+        <button class="btn btn-ghost btn-sm" onclick="openGoalModal()">সেট করুন</button>
+      </div>
+      <div class="pbar-wrap"><div class="pbar-fill" id="goal-bar" style="width:0%;background:var(--purple);"></div></div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:4px;" id="goal-info">লক্ষ্য সেট করুন</div>
+    </div>
+
+    <div class="type-tabs t2" style="margin-bottom:12px;">
+      <button class="ttab active" id="st-deposit" onclick="setSavType('deposit')">💰 জমা</button>
+      <button class="ttab" id="st-withdraw" onclick="setSavType('withdraw')">💸 উত্তোলন</button>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <div class="label">📅 তারিখ</div>
+        <input type="date" class="inp" id="sv-date">
+      </div>
+      <div class="field">
+        <div class="label">📝 বিবরণ</div>
+        <input type="text" class="inp" id="sv-desc" placeholder="কারণ লিখুন...">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <div class="label">💰 পরিমাণ *</div>
+        <input type="number" class="inp" id="sv-amount" placeholder="০" style="font-size:22px;font-weight:900;text-align:center;color:var(--green);">
+      </div>
+      <button class="btn btn-full btn-green" id="sv-save-btn" onclick="saveSavings()">💰 জমা সেভ করুন</button>
+    </div>
+
+    <div id="sv-list"></div>
+  </div>
+
+  <!-- ৫. রিপোর্ট PAGE -->
+  <div class="page" id="page-report">
+
+    <!-- দৈনিক সারসংক্ষেপ -->
+    <div class="card" style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-color:#334155;">
+      <div class="card-title" style="margin-bottom:10px;">📊 আজকের সারসংক্ষেপ</div>
+      <div class="row2" style="margin-bottom:8px;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:var(--ink2);">💰 আয়</div>
+          <div style="font-size:18px;font-weight:900;color:var(--green);" id="rpt-income">৳ ০</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:var(--ink2);">💸 খরচ</div>
+          <div style="font-size:18px;font-weight:900;color:var(--red);" id="rpt-expense">৳ ০</div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:8px;background:rgba(255,255,255,.05);border-radius:10px;">
+        <div style="font-size:11px;color:var(--ink2);">নেট</div>
+        <div style="font-size:22px;font-weight:900;" id="rpt-net">৳ ০</div>
+      </div>
+    </div>
+
+    <!-- মাসিক -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">📆 এই মাসের হিসাব</div>
+      <div id="monthly-summary"></div>
+    </div>
+
+    <!-- বাজেট সেট -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎯 মাসিক বাজেট সেট</div>
+        <button class="btn btn-ghost btn-sm" onclick="openBudgetModal()">✏️ এডিট</button>
+      </div>
+      <div id="budget-display">
+        <div style="font-size:13px;color:var(--ink3);text-align:center;padding:10px;">বাজেট সেট করুন</div>
+      </div>
+    </div>
+
+    <!-- মেমো ও ব্যাকআপ -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">📄 মেমো ও ব্যাকআপ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button class="btn btn-ghost" onclick="openDailyMemo()">📄 আজকের মেমো</button>
+        <button class="btn btn-ghost" onclick="openMonthlyMemo()">📆 মাসিক মেমো</button>
+        <button class="btn btn-amber" onclick="doBackup()">💾 ব্যাকআপ</button>
+        <button class="btn btn-ghost" onclick="doRestore()">📂 রিস্টোর</button>
+      </div>
+    </div>
+
+    <!-- সেটিংস -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">⚙️ সেটিংস</div>
+      <div class="field">
+        <div class="label">👤 আপনার নাম</div>
+        <input type="text" class="inp" id="user-name" placeholder="আপনার নাম লিখুন..." onchange="saveUserName()">
+      </div>
+      <button class="btn btn-ghost btn-full" onclick="installPWA()" id="install-btn" style="display:none;margin-top:4px;">📱 হোম স্ক্রিনে যোগ করুন</button>
+    </div>
+
+  </div>
+</div><!-- /pages -->
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav">
+  <button class="bn-btn" id="bn-khoroch" onclick="switchTab('khoroch')">
+    <span class="bn-icon">💸</span><span class="bn-label">খরচ</span>
+  </button>
+  <button class="bn-btn" id="bn-income" onclick="switchTab('income')">
+    <span class="bn-icon">💰</span><span class="bn-label">আয়</span>
+  </button>
+  <button class="bn-btn" id="bn-loan" onclick="switchTab('loan')">
+    <span class="bn-icon">🤝</span><span class="bn-label">ধার</span>
+  </button>
+  <button class="bn-btn" id="bn-savings" onclick="switchTab('savings')">
+    <span class="bn-icon">🏦</span><span class="bn-label">সঞ্চয়</span>
+  </button>
+  <button class="bn-btn active" id="bn-report" onclick="switchTab('report')">
+    <span class="bn-icon">📊</span><span class="bn-label">রিপোর্ট</span>
+  </button>
+</nav>
+
+</div><!-- /app -->
+
+<!-- ══ TOAST ══ -->
+<div class="toast-el" id="toast"></div>
+
+<!-- ══ PHOTO ZOOM ══ -->
+<div id="kh-photo-zoom" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center;">
+  <img id="kh-zoom-img" src="" style="max-width:95%;max-height:90vh;border-radius:12px;object-fit:contain;">
+</div>
+
+<!-- ══ MODAL: মেমো ══ -->
+<div class="modal-bg" id="modal-memo">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="memo-modal-title">📄 মেমো</div>
+      <button class="modal-close" onclick="closeModal('modal-memo')">✕</button>
+    </div>
+    <div class="field">
+      <div class="label">📝 নোট (ইচ্ছামতো)</div>
+      <input type="text" class="inp" id="memo-note" placeholder="অতিরিক্ত তথ্য...">
+    </div>
+    <div id="memo-content" style="margin-bottom:14px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <button class="btn btn-green" onclick="shareMemoWA()">📱 WhatsApp</button>
+      <button class="btn btn-ghost" onclick="shareMemoIMO()">💬 IMO</button>
+      <button class="btn btn-ghost" onclick="printMemo()">🖨️ প্রিন্ট</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: বাজেট ══ -->
+<div class="modal-bg" id="modal-budget">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">🎯 মাসিক বাজেট সেট</div>
+      <button class="modal-close" onclick="closeModal('modal-budget')">✕</button>
+    </div>
+    <div class="field">
+      <div class="label">💰 মোট মাসিক বাজেট</div>
+      <input type="number" class="inp" id="budget-total-inp" placeholder="০" style="font-size:20px;font-weight:900;text-align:center;color:var(--amber);">
+    </div>
+    <button class="btn btn-full btn-amber" onclick="saveBudget()">✅ বাজেট সেভ করুন</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: সঞ্চয় লক্ষ্য ══ -->
+<div class="modal-bg" id="modal-goal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">🎯 সঞ্চয় লক্ষ্য সেট</div>
+      <button class="modal-close" onclick="closeModal('modal-goal')">✕</button>
+    </div>
+    <div class="field">
+      <div class="label">🎯 লক্ষ্যমাত্রা</div>
+      <input type="number" class="inp" id="goal-amount-inp" placeholder="০" style="font-size:20px;font-weight:900;text-align:center;color:var(--purple);">
+    </div>
+    <button class="btn btn-full btn-green" onclick="saveGoal()">✅ লক্ষ্য সেভ করুন</button>
+  </div>
+</div>
+
+<!-- hidden file input for restore -->
+<input type="file" id="restore-file" accept=".json" onchange="loadRestoreFile(this)" style="display:none;">
+
+<script>
+// ══════════════════════════════════════════════════
+//  আমার হিসাব — DB & CORE
+// ══════════════════════════════════════════════════
+const DB_KEY = 'amarhisab_v1';
+let DB = {
+  khoroch: [],   // খরচ
+  income: [],    // আয়
+  loans: [],     // ধার (given + taken)
+  savings: [],   // সঞ্চয়
+  budget: 0,     // মাসিক বাজেট
+  goal: 0,       // সঞ্চয় লক্ষ্য
+  userName: ''
+};
+
+function saveDB(){
+  localStorage.setItem(DB_KEY, JSON.stringify(DB));
+  updateAutoBackupStatus();
+}
+
+function loadDB(){
+  const d = localStorage.getItem(DB_KEY);
+  if(d){
+    const parsed = JSON.parse(d);
+    DB = { ...DB, ...parsed };
+  }
+}
+
+function today(){
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('bn-BD', {day:'numeric', month:'long', year:'numeric'});
+}
+
+function taka(n){
+  return '৳ ' + (n||0).toLocaleString('bn-BD');
+}
+
+function genId(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+function toast(msg, color='#10b981'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = color;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ══ DATE RANGE ══
+function getRange(filter){
+  const now = new Date();
+  const todayStr = today();
+  if(filter === 'today') return { from: todayStr, to: todayStr };
+  if(filter === 'week'){
+    const d = new Date(now);
+    d.setDate(d.getDate() - 6);
+    return { from: d.toISOString().split('T')[0], to: todayStr };
+  }
+  if(filter === 'month'){
+    return { from: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`, to: todayStr };
+  }
+  return { from: '2000-01-01', to: '2099-12-31' };
+}
+
+function inRange(date, filter){
+  const { from, to } = getRange(filter);
+  return date >= from && date <= to;
+}
+
+// ══ HEADER ══
+function initHeader(){
+  const now = new Date();
+  document.getElementById('hdr-date').textContent =
+    now.toLocaleDateString('bn-BD', {day:'numeric', month:'short', year:'numeric'});
+  if(DB.userName) document.getElementById('hdr-user-name').textContent = DB.userName + '-এর হিসাব';
+  document.getElementById('user-name').value = DB.userName || '';
+}
+
+// ══ TAB SWITCH ══
+let _currentTab = 'khoroch';
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bn-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.getElementById('bn-'+tab).classList.add('active');
+  _currentTab = tab;
+  if(tab==='khoroch') renderKhoroch();
+  if(tab==='income') renderIncome();
+  if(tab==='loan') renderLoans();
+  if(tab==='savings') renderSavings();
+  if(tab==='report') renderReport();
+}
+
+// ══════════════════════════════════════════════════
+//  খরচ
+// ══════════════════════════════════════════════════
+let _khFilter = 'today';
+
+function acKhType(inp){
+  const v = inp.value.toLowerCase();
+  if(!v){ hideAC('ac-kh-type'); return; }
+  const set = new Set();
+  const defaults = ['বাজার','বিদ্যুৎ বিল','গ্যাস বিল','পানির বিল','বাড়ি ভাড়া','সন্তানের পড়াশোনা','চিকিৎসা','যানবাহন','পোশাক','বিনোদন','রেস্তোরাঁ','অন্যান্য'];
+  defaults.forEach(d=>set.add(d));
+  DB.khoroch.forEach(e=>{ if(e.ktype) set.add(e.ktype); });
+  const hits = [...set].filter(d=>d.toLowerCase().includes(v)).slice(0,6);
+  showAC('ac-kh-type', hits, 'setKhType');
+}
+function setKhType(val){ document.getElementById('kh-type').value = val; hideAC('ac-kh-type'); }
+
+function captureKhPhoto(input){
+  if(!input.files||!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    input._photoData = e.target.result;
+    document.getElementById('kh-photo-thumb').src = e.target.result;
+    document.getElementById('kh-zoom-img').src = e.target.result;
+    document.getElementById('kh-photo-preview').style.display = 'block';
+    toast('📷 ছবি যুক্ত হয়েছে!');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function zoomPhoto(zoomId){
+  const el = document.getElementById(zoomId);
+  el.style.display = 'flex';
+}
+
+function saveKhoroch(){
+  const ktype = document.getElementById('kh-type').value.trim();
+  const desc = document.getElementById('kh-desc').value.trim();
+  const amount = parseFloat(document.getElementById('kh-amount').value)||0;
+  const date = document.getElementById('kh-date').value;
+  if(!ktype){ toast('খরচের ধরন দিন!','#ef4444'); return; }
+  if(!amount){ toast('টাকার পরিমাণ দিন!','#ef4444'); return; }
+  const cam = document.getElementById('kh-camera');
+  const entry = { id:genId(), ktype, desc, amount, date, photo:cam._photoData||'', createdAt:new Date().toISOString() };
+  DB.khoroch.unshift(entry);
+  saveDB();
+  // reset
+  document.getElementById('kh-type').value = '';
+  document.getElementById('kh-desc').value = '';
+  document.getElementById('kh-amount').value = '';
+  document.getElementById('kh-photo-preview').style.display = 'none';
+  if(cam){ cam._photoData=''; cam.value=''; }
+  toast('✅ খরচ সেভ হয়েছে!');
+  renderKhoroch();
+  // auto memo
+  setTimeout(()=> openEntryMemo('khoroch', entry.id), 400);
+}
+
+function setKhFilter(f){
+  _khFilter = f;
+  ['today','week','month','all'].forEach(x=>document.getElementById('kf-'+x).classList.remove('active'));
+  document.getElementById('kf-'+f).classList.add('active');
+  renderKhoroch();
+}
+
+function renderKhoroch(){
+  const data = DB.khoroch.filter(e=>inRange(e.date, _khFilter));
+  const todayData = DB.khoroch.filter(e=>e.date===today());
+  const monthData = DB.khoroch.filter(e=>inRange(e.date,'month'));
+  const todayTotal = todayData.reduce((s,e)=>s+(e.amount||0),0);
+  const monthTotal = monthData.reduce((s,e)=>s+(e.amount||0),0);
+  document.getElementById('sk-today').textContent = taka(todayTotal);
+  document.getElementById('sk-month').textContent = taka(monthTotal);
+  // বাজেট বার
+  if(DB.budget > 0){
+    document.getElementById('budget-card').style.display = 'block';
+    const pct = Math.min(100, Math.round(monthTotal/DB.budget*100));
+    document.getElementById('budget-info').textContent = `${taka(monthTotal)} / ${taka(DB.budget)}`;
+    const bar = document.getElementById('budget-bar');
+    bar.style.width = pct+'%';
+    bar.style.background = pct>90?'#ef4444':pct>70?'#f59e0b':'#10b981';
+    const remain = DB.budget - monthTotal;
+    document.getElementById('budget-remain').textContent = remain>=0 ? `আরো ${taka(remain)} খরচ করা যাবে` : `বাজেট ${taka(-remain)} ছাড়িয়ে গেছে!`;
+  }
+  const list = document.getElementById('kh-list');
+  if(!data.length){ list.innerHTML='<div class="empty"><div class="empty-icon">💸</div><div class="empty-text">কোনো খরচ নেই</div></div>'; return; }
+  list.innerHTML = data.map(e=>`
+    <div class="entry-item" style="border-left-color:var(--red);">
+      <div class="ei-row">
+        <div class="ei-left">
+          <div class="ei-title">${e.ktype}</div>
+          ${e.desc?`<div class="ei-sub">${e.desc}</div>`:''}
+          <div class="ei-date">${fmtDate(e.date)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="ei-amt" style="color:var(--red);">${taka(e.amount)}</div>
+          <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end;">
+            ${e.photo?`<button class="btn btn-ghost btn-sm" onclick="viewPhoto('${e.id}')">📷</button>`:''}
+            <button class="btn btn-ghost btn-sm" onclick="openEntryMemo('khoroch','${e.id}')">📄</button>
+            <button class="btn btn-sm" style="background:rgba(239,68,68,.15);color:var(--red);" onclick="deleteEntry('khoroch','${e.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  আয়
+// ══════════════════════════════════════════════════
+let _inFilter = 'today';
+
+function acInSource(inp){
+  const v = inp.value.toLowerCase();
+  if(!v){ hideAC('ac-in-source'); return; }
+  const set = new Set();
+  const defaults = ['বেতন','ব্যবসা','কৃষি','ভাড়া','ফ্রিল্যান্স','বোনাস','অন্যান্য'];
+  defaults.forEach(d=>set.add(d));
+  DB.income.forEach(e=>{ if(e.source) set.add(e.source); });
+  const hits = [...set].filter(d=>d.toLowerCase().includes(v)).slice(0,6);
+  showAC('ac-in-source', hits, 'setInSource');
+}
+function setInSource(val){ document.getElementById('in-source').value = val; hideAC('ac-in-source'); }
+
+function saveIncome(){
+  const source = document.getElementById('in-source').value.trim();
+  const desc = document.getElementById('in-desc').value.trim();
+  const amount = parseFloat(document.getElementById('in-amount').value)||0;
+  const date = document.getElementById('in-date').value;
+  if(!source){ toast('আয়ের উৎস দিন!','#ef4444'); return; }
+  if(!amount){ toast('পরিমাণ দিন!','#ef4444'); return; }
+  const entry = { id:genId(), source, desc, amount, date, createdAt:new Date().toISOString() };
+  DB.income.unshift(entry);
+  saveDB();
+  document.getElementById('in-source').value = '';
+  document.getElementById('in-desc').value = '';
+  document.getElementById('in-amount').value = '';
+  toast('✅ আয় সেভ হয়েছে!');
+  renderIncome();
+  setTimeout(()=>openEntryMemo('income', entry.id), 400);
+}
+
+function setInFilter(f){
+  _inFilter = f;
+  ['today','week','month','all'].forEach(x=>document.getElementById('if-'+x).classList.remove('active'));
+  document.getElementById('if-'+f).classList.add('active');
+  renderIncome();
+}
+
+function renderIncome(){
+  const data = DB.income.filter(e=>inRange(e.date, _inFilter));
+  const monthIncome = DB.income.filter(e=>inRange(e.date,'month')).reduce((s,e)=>s+(e.amount||0),0);
+  const monthExpense = DB.khoroch.filter(e=>inRange(e.date,'month')).reduce((s,e)=>s+(e.amount||0),0);
+  const net = monthIncome - monthExpense;
+  document.getElementById('si-month').textContent = taka(monthIncome);
+  document.getElementById('si-net').textContent = taka(net);
+  document.getElementById('si-net').style.color = net>=0?'var(--green)':'var(--red)';
+  const list = document.getElementById('in-list');
+  if(!data.length){ list.innerHTML='<div class="empty"><div class="empty-icon">💰</div><div class="empty-text">কোনো আয় নেই</div></div>'; return; }
+  list.innerHTML = data.map(e=>`
+    <div class="entry-item" style="border-left-color:var(--green);">
+      <div class="ei-row">
+        <div class="ei-left">
+          <div class="ei-title">${e.source}</div>
+          ${e.desc?`<div class="ei-sub">${e.desc}</div>`:''}
+          <div class="ei-date">${fmtDate(e.date)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="ei-amt" style="color:var(--green);">${taka(e.amount)}</div>
+          <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end;">
+            <button class="btn btn-ghost btn-sm" onclick="openEntryMemo('income','${e.id}')">📄</button>
+            <button class="btn btn-sm" style="background:rgba(239,68,68,.15);color:var(--red);" onclick="deleteEntry('income','${e.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  ধার
+// ══════════════════════════════════════════════════
+let _loanType = 'given';
+
+function setLoanType(type){
+  _loanType = type;
+  document.getElementById('lt-given').className = 'ttab' + (type==='given'?' active':'');
+  document.getElementById('lt-taken').className = 'ttab' + (type==='taken'?' active':'');
+  document.getElementById('loan-icon').textContent = type==='given'?'📤':'📥';
+  document.getElementById('loan-form-title').textContent = type==='given'?'ধার দেওয়ার এন্ট্রি':'ধার নেওয়ার এন্ট্রি';
+  document.getElementById('loan-save-btn').textContent = type==='given'?'💾 ধার দেওয়া সেভ করুন':'💾 ধার নেওয়া সেভ করুন';
+  renderLoans();
+}
+
+function getPersonBalance(name){
+  const given = DB.loans.filter(e=>e.name.toLowerCase()===name.toLowerCase()&&e.ltype==='given').reduce((s,e)=>s+(e.amount||0),0);
+  const takenBack = DB.loans.filter(e=>e.name.toLowerCase()===name.toLowerCase()&&e.ltype==='given_paid').reduce((s,e)=>s+(e.amount||0),0);
+  return Math.max(0, given - takenBack);
+}
+
+function acLoanName(inp){
+  const v = inp.value.toLowerCase();
+  if(!v){ hideAC('ac-lp-name'); return; }
+  const set = new Set();
+  DB.loans.filter(e=>e.ltype===_loanType||e.ltype===(_loanType==='given'?'given_paid':'taken_paid')).forEach(e=>set.add(e.name));
+  const hits = [...set].filter(n=>n.toLowerCase().includes(v)).slice(0,6);
+  showAC('ac-lp-name', hits, 'setLoanPayName');
+}
+function setLoanPayName(val){ document.getElementById('lp-name').value=val; hideAC('ac-lp-name'); loadLoanBalance(); }
+
+function loadLoanBalance(){
+  const name = document.getElementById('lp-name').value.trim();
+  if(!name){ document.getElementById('lp-current').value=''; return; }
+  const ptype = _loanType==='given'?'given':'taken';
+  const paidType = _loanType==='given'?'given_paid':'taken_paid';
+  const total = DB.loans.filter(e=>e.name.toLowerCase()===name.toLowerCase()&&e.ltype===ptype).reduce((s,e)=>s+(e.amount||0),0);
+  const paid = DB.loans.filter(e=>e.name.toLowerCase()===name.toLowerCase()&&e.ltype===paidType).reduce((s,e)=>s+(e.amount||0),0);
+  document.getElementById('lp-current').value = Math.max(0,total-paid) || '';
+}
+
+function calcLoanRemain(){}
+
+function saveLoan(){
+  const name = document.getElementById('ln-name').value.trim();
+  const phone = document.getElementById('ln-phone').value.trim();
+  const amount = parseFloat(document.getElementById('ln-amount').value)||0;
+  const desc = document.getElementById('ln-desc').value.trim();
+  const date = document.getElementById('ln-date').value;
+  if(!name){ toast('নাম দিন!','#ef4444'); return; }
+  if(!amount){ toast('পরিমাণ দিন!','#ef4444'); return; }
+  const entry = { id:genId(), ltype:_loanType, name, phone, amount, desc, date, createdAt:new Date().toISOString() };
+  DB.loans.unshift(entry);
+  saveDB();
+  document.getElementById('ln-name').value='';
+  document.getElementById('ln-phone').value='';
+  document.getElementById('ln-amount').value='';
+  document.getElementById('ln-desc').value='';
+  toast('✅ সেভ হয়েছে!');
+  renderLoans();
+}
+
+function saveLoanPayment(){
+  const name = document.getElementById('lp-name').value.trim();
+  const amount = parseFloat(document.getElementById('lp-amount').value)||0;
+  const current = parseFloat(document.getElementById('lp-current').value)||0;
+  if(!name){ toast('নাম দিন!','#ef4444'); return; }
+  if(!amount){ toast('পরিমাণ দিন!','#ef4444'); return; }
+  if(current<=0){ toast('কোনো বাকি নেই!','#ef4444'); return; }
+  if(amount>current){ toast('পরিশোধ বাকির চেয়ে বেশি!','#ef4444'); return; }
+  const paidType = _loanType==='given'?'given_paid':'taken_paid';
+  const entry = { id:genId(), ltype:paidType, name, amount, date:today(), createdAt:new Date().toISOString() };
+  DB.loans.unshift(entry);
+  saveDB();
+  document.getElementById('lp-name').value='';
+  document.getElementById('lp-amount').value='';
+  document.getElementById('lp-current').value='';
+  toast('✅ পরিশোধ সেভ হয়েছে!');
+  renderLoans();
+}
+
+function renderLoans(){
+  // summary
+  const givenNames = [...new Set(DB.loans.filter(e=>e.ltype==='given').map(e=>e.name))];
+  const takenNames = [...new Set(DB.loans.filter(e=>e.ltype==='taken').map(e=>e.name))];
+  const totalGiven = givenNames.reduce((s,n)=>{
+    const g=DB.loans.filter(e=>e.name===n&&e.ltype==='given').reduce((a,e)=>a+(e.amount||0),0);
+    const p=DB.loans.filter(e=>e.name===n&&e.ltype==='given_paid').reduce((a,e)=>a+(e.amount||0),0);
+    return s+Math.max(0,g-p);
+  },0);
+  const totalTaken = takenNames.reduce((s,n)=>{
+    const g=DB.loans.filter(e=>e.name===n&&e.ltype==='taken').reduce((a,e)=>a+(e.amount||0),0);
+    const p=DB.loans.filter(e=>e.name===n&&e.ltype==='taken_paid').reduce((a,e)=>a+(e.amount||0),0);
+    return s+Math.max(0,g-p);
+  },0);
+  document.getElementById('sl-given').textContent = taka(totalGiven);
+  document.getElementById('sl-taken').textContent = taka(totalTaken);
+  // list
+  const relevantType = _loanType;
+  const paidType = _loanType==='given'?'given_paid':'taken_paid';
+  const names = [...new Set(DB.loans.filter(e=>e.ltype===relevantType).map(e=>e.name))];
+  const list = document.getElementById('ln-list');
+  if(!names.length){ list.innerHTML='<div class="empty"><div class="empty-icon">🤝</div><div class="empty-text">কোনো ধার নেই</div></div>'; return; }
+  list.innerHTML = names.map(name=>{
+    const totalAmt = DB.loans.filter(e=>e.name===name&&e.ltype===relevantType).reduce((s,e)=>s+(e.amount||0),0);
+    const paidAmt = DB.loans.filter(e=>e.name===name&&e.ltype===paidType).reduce((s,e)=>s+(e.amount||0),0);
+    const remain = Math.max(0, totalAmt-paidAmt);
+    const lastEntry = DB.loans.find(e=>e.name===name&&e.ltype===relevantType);
+    return `<div class="loan-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--ink);">${name}</div>
+          ${lastEntry?.phone?`<div style="font-size:11px;color:var(--ink2);">📱 ${lastEntry.phone}</div>`:''}
+          <div style="font-size:11px;color:var(--ink3);">${lastEntry?fmtDate(lastEntry.date):''}</div>
+        </div>
+        <div style="text-align:right;">
+          ${remain>0?`<div style="font-size:16px;font-weight:900;color:var(--red);">${taka(remain)}</div><div style="font-size:10px;color:var(--ink3);">বাকি</div>`:`<div style="font-size:13px;font-weight:800;color:var(--green);">✅ পরিশোধ</div>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  সঞ্চয়
+// ══════════════════════════════════════════════════
+let _savType = 'deposit';
+
+function setSavType(type){
+  _savType = type;
+  document.getElementById('st-deposit').className = 'ttab'+(type==='deposit'?' active':'');
+  document.getElementById('st-withdraw').className = 'ttab'+(type==='withdraw'?' active':'');
+  document.getElementById('sv-save-btn').textContent = type==='deposit'?'💰 জমা সেভ করুন':'💸 উত্তোলন সেভ করুন';
+  document.getElementById('sv-save-btn').className = 'btn btn-full ' + (type==='deposit'?'btn-green':'btn-red');
+  document.getElementById('sv-amount').style.color = type==='deposit'?'var(--green)':'var(--red)';
+}
+
+function saveSavings(){
+  const desc = document.getElementById('sv-desc').value.trim();
+  const amount = parseFloat(document.getElementById('sv-amount').value)||0;
+  const date = document.getElementById('sv-date').value;
+  if(!amount){ toast('পরিমাণ দিন!','#ef4444'); return; }
+  const entry = { id:genId(), stype:_savType, desc, amount, date, createdAt:new Date().toISOString() };
+  DB.savings.unshift(entry);
+  saveDB();
+  document.getElementById('sv-desc').value='';
+  document.getElementById('sv-amount').value='';
+  toast('✅ সেভ হয়েছে!');
+  renderSavings();
+}
+
+function openGoalModal(){
+  document.getElementById('goal-amount-inp').value = DB.goal||'';
+  openModal('modal-goal');
+}
+
+function saveGoal(){
+  DB.goal = parseFloat(document.getElementById('goal-amount-inp').value)||0;
+  saveDB();
+  closeModal('modal-goal');
+  renderSavings();
+  toast('✅ লক্ষ্য সেট হয়েছে!');
+}
+
+function renderSavings(){
+  const deposit = DB.savings.filter(e=>e.stype==='deposit').reduce((s,e)=>s+(e.amount||0),0);
+  const withdraw = DB.savings.filter(e=>e.stype==='withdraw').reduce((s,e)=>s+(e.amount||0),0);
+  const total = deposit - withdraw;
+  document.getElementById('ss-total').textContent = taka(total);
+  document.getElementById('ss-goal').textContent = DB.goal?taka(DB.goal):'সেট নেই';
+  // goal bar
+  if(DB.goal>0){
+    const pct = Math.min(100, Math.round(total/DB.goal*100));
+    document.getElementById('goal-bar').style.width = pct+'%';
+    document.getElementById('goal-info').textContent = `লক্ষ্যের ${pct}% অর্জিত — আরো ${taka(Math.max(0,DB.goal-total))} দরকার`;
+  }
+  const list = document.getElementById('sv-list');
+  if(!DB.savings.length){ list.innerHTML='<div class="empty"><div class="empty-icon">🏦</div><div class="empty-text">কোনো সঞ্চয় নেই</div></div>'; return; }
+  list.innerHTML = DB.savings.map(e=>`
+    <div class="entry-item" style="border-left-color:${e.stype==='deposit'?'var(--green)':'var(--red)'};">
+      <div class="ei-row">
+        <div class="ei-left">
+          <div class="ei-title">${e.stype==='deposit'?'💰 জমা':'💸 উত্তোলন'}</div>
+          ${e.desc?`<div class="ei-sub">${e.desc}</div>`:''}
+          <div class="ei-date">${fmtDate(e.date)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="ei-amt" style="color:${e.stype==='deposit'?'var(--green)':'var(--red)'};">${taka(e.amount)}</div>
+          <button class="btn btn-sm" style="background:rgba(239,68,68,.15);color:var(--red);margin-top:6px;" onclick="deleteEntry('savings','${e.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  রিপোর্ট
+// ══════════════════════════════════════════════════
+function renderReport(){
+  const t = today();
+  const todayIncome = DB.income.filter(e=>e.date===t).reduce((s,e)=>s+(e.amount||0),0);
+  const todayExpense = DB.khoroch.filter(e=>e.date===t).reduce((s,e)=>s+(e.amount||0),0);
+  const net = todayIncome - todayExpense;
+  document.getElementById('rpt-income').textContent = taka(todayIncome);
+  document.getElementById('rpt-expense').textContent = taka(todayExpense);
+  document.getElementById('rpt-net').textContent = taka(net);
+  document.getElementById('rpt-net').style.color = net>=0?'var(--green)':'var(--red)';
+
+  // মাসিক সারসংক্ষেপ
+  const monthIncome = DB.income.filter(e=>inRange(e.date,'month')).reduce((s,e)=>s+(e.amount||0),0);
+  const monthExpense = DB.khoroch.filter(e=>inRange(e.date,'month')).reduce((s,e)=>s+(e.amount||0),0);
+  const monthNet = monthIncome - monthExpense;
+  const savings = DB.savings.filter(e=>e.stype==='deposit').reduce((s,e)=>s+(e.amount||0),0) - DB.savings.filter(e=>e.stype==='withdraw').reduce((s,e)=>s+(e.amount||0),0);
+  document.getElementById('monthly-summary').innerHTML = `
+    <div class="memo-row"><span>💰 মোট আয়</span><span style="font-weight:800;color:var(--green);">${taka(monthIncome)}</span></div>
+    <div class="memo-row"><span>💸 মোট খরচ</span><span style="font-weight:800;color:var(--red);">${taka(monthExpense)}</span></div>
+    <div class="memo-row"><span>🏦 মোট সঞ্চয়</span><span style="font-weight:800;color:var(--purple);">${taka(savings)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:900;border-top:1.5px solid #334155;margin-top:4px;">
+      <span>📊 নেট সাশ্রয়</span>
+      <span style="color:${monthNet>=0?'var(--green)':'var(--red)'};">${taka(monthNet)}</span>
+    </div>`;
+
+  // বাজেট ডিসপ্লে
+  if(DB.budget>0){
+    const pct = Math.min(100,Math.round(monthExpense/DB.budget*100));
+    document.getElementById('budget-display').innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--ink2);">খরচ হয়েছে</span>
+        <span style="font-size:13px;font-weight:800;">${pct}%</span>
+      </div>
+      <div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%;background:${pct>90?'#ef4444':pct>70?'#f59e0b':'#10b981'};"></div></div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:4px;">${taka(monthExpense)} / ${taka(DB.budget)}</div>`;
+  }
+}
+
+function openBudgetModal(){
+  document.getElementById('budget-total-inp').value = DB.budget||'';
+  openModal('modal-budget');
+}
+
+function saveBudget(){
+  DB.budget = parseFloat(document.getElementById('budget-total-inp').value)||0;
+  saveDB();
+  closeModal('modal-budget');
+  renderReport();
+  renderKhoroch();
+  toast('✅ বাজেট সেট হয়েছে!');
+}
+
+// ══════════════════════════════════════════════════
+//  মেমো
+// ══════════════════════════════════════════════════
+let _memoHTML = '';
+
+function openEntryMemo(type, id){
+  let e, html='', title='';
+  if(type==='khoroch'){
+    e = DB.khoroch.find(x=>x.id===id);
+    if(!e) return;
+    title = '💸 খরচের মেমো';
+    html = buildMemo(title, [
+      {label:'📂 ধরন', value:e.ktype},
+      {label:'📝 বিবরণ', value:e.desc||'—'},
+      {label:'📅 তারিখ', value:fmtDate(e.date)},
+    ], taka(e.amount), 'খরচ');
+  } else if(type==='income'){
+    e = DB.income.find(x=>x.id===id);
+    if(!e) return;
+    title = '💰 আয়ের মেমো';
+    html = buildMemo(title, [
+      {label:'📂 উৎস', value:e.source},
+      {label:'📝 বিবরণ', value:e.desc||'—'},
+      {label:'📅 তারিখ', value:fmtDate(e.date)},
+    ], taka(e.amount), 'আয়');
+  }
+  _memoHTML = html;
+  document.getElementById('memo-modal-title').textContent = title;
+  document.getElementById('memo-note').value = '';
+  document.getElementById('memo-content').innerHTML = html;
+  openModal('modal-memo');
+}
+
+function openDailyMemo(){
+  const t = today();
+  const khData = DB.khoroch.filter(e=>e.date===t);
+  const inData = DB.income.filter(e=>e.date===t);
+  const khTotal = khData.reduce((s,e)=>s+(e.amount||0),0);
+  const inTotal = inData.reduce((s,e)=>s+(e.amount||0),0);
+  const net = inTotal - khTotal;
+  const userName = DB.userName || 'আমার';
+  const html = `<div class="memo-wrap">
+    <div class="memo-title-main">আমার হিসাব</div>
+    <div class="memo-addr">${userName}-এর ব্যক্তিগত হিসাব খাতা</div>
+    <div style="text-align:center;font-size:12px;font-weight:800;color:#b45309;margin-bottom:8px;">📅 দৈনিক হিসাব — ${fmtDate(t)}</div>
+    ${inData.length?`<div class="memo-section">💰 আয়</div>${inData.map((e,i)=>`<div class="memo-row"><span>${i+1}. ${e.source}${e.desc?' — '+e.desc:''}</span><span style="font-weight:800;color:#065f46;">${taka(e.amount)}</span></div>`).join('')}`:''}
+    ${khData.length?`<div class="memo-section">💸 খরচ</div>${khData.map((e,i)=>`<div class="memo-row"><span>${i+1}. ${e.ktype}${e.desc?' — '+e.desc:''}</span><span style="font-weight:800;color:#991b1b;">${taka(e.amount)}</span></div>`).join('')}`:''}
+    <div class="memo-row" style="border-top:1.5px solid #bfdbfe;margin-top:8px;padding-top:8px;"><span>💰 মোট আয়</span><span style="font-weight:800;color:#065f46;">${taka(inTotal)}</span></div>
+    <div class="memo-row"><span>💸 মোট খরচ</span><span style="font-weight:800;color:#991b1b;">${taka(khTotal)}</span></div>
+    <div class="memo-total"><span>📊 নেট</span><span style="color:${net>=0?'#065f46':'#991b1b'};">${taka(net)}</span></div>
+    <div style="text-align:center;font-size:11px;color:#888;margin-top:8px;">আমার হিসাব অ্যাপ দ্বারা তৈরি 📒</div>
+  </div>`;
+  _memoHTML = html;
+  document.getElementById('memo-modal-title').textContent = '📅 আজকের মেমো';
+  document.getElementById('memo-note').value = '';
+  document.getElementById('memo-content').innerHTML = html;
+  openModal('modal-memo');
+}
+
+function openMonthlyMemo(){
+  const monthIncome = DB.income.filter(e=>inRange(e.date,'month')).reduce((s,e)=>s+(e.amount||0),0);
+  const monthExpense = DB.khoroch.filter(e=>inRange(e.date,'month')).reduce((s,e)=>s+(e.amount||0),0);
+  // খরচের ধরন অনুযায়ী গ্রুপ
+  const groups = {};
+  DB.khoroch.filter(e=>inRange(e.date,'month')).forEach(e=>{
+    if(!groups[e.ktype]) groups[e.ktype]=0;
+    groups[e.ktype]+=(e.amount||0);
+  });
+  const net = monthIncome - monthExpense;
+  const now = new Date();
+  const monthName = now.toLocaleDateString('bn-BD',{month:'long',year:'numeric'});
+  const html = `<div class="memo-wrap">
+    <div class="memo-title-main">আমার হিসাব</div>
+    <div class="memo-addr">${DB.userName||'ব্যক্তিগত'} হিসাব খাতা</div>
+    <div style="text-align:center;font-size:12px;font-weight:800;color:#1e40af;margin-bottom:8px;">📆 মাসিক সারসংক্ষেপ — ${monthName}</div>
+    <div class="memo-section">💰 আয়</div>
+    <div class="memo-row"><span>মোট আয়</span><span style="font-weight:800;color:#065f46;">${taka(monthIncome)}</span></div>
+    <div class="memo-section">💸 খরচের বিবরণ</div>
+    ${Object.entries(groups).map(([k,v])=>`<div class="memo-row"><span>${k}</span><span style="font-weight:700;">${taka(v)}</span></div>`).join('')}
+    <div class="memo-total"><span>মোট খরচ</span><span style="color:#991b1b;">${taka(monthExpense)}</span></div>
+    <div class="memo-total"><span>📊 নেট সাশ্রয়</span><span style="color:${net>=0?'#065f46':'#991b1b'};">${taka(net)}</span></div>
+    <div style="text-align:center;font-size:11px;color:#888;margin-top:8px;">আমার হিসাব অ্যাপ দ্বারা তৈরি 📒</div>
+  </div>`;
+  _memoHTML = html;
+  document.getElementById('memo-modal-title').textContent = '📆 মাসিক মেমো';
+  document.getElementById('memo-note').value = '';
+  document.getElementById('memo-content').innerHTML = html;
+  openModal('modal-memo');
+}
+
+function buildMemo(title, rows, total, totalLabel){
+  const note = document.getElementById('memo-note')?.value||'';
+  return `<div class="memo-wrap">
+    <div class="memo-title-main">আমার হিসাব</div>
+    <div class="memo-addr">${DB.userName||'ব্যক্তিগত'} হিসাব খাতা</div>
+    ${note?`<div style="font-size:12px;color:#555;text-align:center;margin-bottom:6px;">📝 ${note}</div>`:''}
+    ${rows.map(r=>`<div class="memo-row"><span>${r.label}</span><span style="font-weight:700;">${r.value}</span></div>`).join('')}
+    <div class="memo-total"><span>💰 ${totalLabel}</span><span>${total}</span></div>
+    <div style="text-align:center;font-size:11px;color:#888;margin-top:8px;">আমার হিসাব অ্যাপ দ্বারা তৈরি 📒</div>
+  </div>`;
+}
+
+function getMemoText(){
+  const note = document.getElementById('memo-note').value;
+  const wrap = document.getElementById('memo-content');
+  let text = 'আমার হিসাব\n' + (DB.userName?DB.userName+'-এর হিসাব\n':'');
+  if(note) text += '📝 '+note+'\n';
+  text += '━━━━━━━━━━━━━━━━━━━━\n';
+  wrap.querySelectorAll('.memo-row,.memo-total').forEach(row=>{
+    const cells = row.querySelectorAll('span');
+    if(cells.length>=2) text += cells[0].textContent + ' : ' + cells[1].textContent + '\n';
+  });
+  return text;
+}
+
+function shareMemoWA(){
+  const text = getMemoText();
+  window.open('https://wa.me/?text='+encodeURIComponent(text));
+}
+function shareMemoIMO(){
+  const text = getMemoText();
+  if(navigator.share) navigator.share({text});
+  else{ navigator.clipboard?.writeText(text); toast('📋 কপি হয়েছে!'); }
+}
+function printMemo(){
+  const content = document.getElementById('memo-content').innerHTML;
+  const w = window.open('','_blank');
+  w.document.write(`<html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700;900&display=swap" rel="stylesheet"><style>body{font-family:'Noto Sans Bengali',sans-serif;padding:20px;}</style></head><body>${content}<script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+// ══════════════════════════════════════════════════
+//  ব্যাকআপ / রিস্টোর
+// ══════════════════════════════════════════════════
+let _lastBackup = null;
+
+function doBackup(){
+  const data = JSON.stringify(DB, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const now = new Date();
+  a.href = url;
+  a.download = `amarhisab_backup_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  _lastBackup = new Date().toISOString();
+  localStorage.setItem('amarhisab_last_backup', _lastBackup);
+  toast('✅ ব্যাকআপ ডাউনলোড হয়েছে!');
+}
+
+function doRestore(){
+  document.getElementById('restore-file').click();
+}
+
+function loadRestoreFile(input){
+  if(!input.files||!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.khoroch && !data.income){ toast('ফাইল সঠিক নয়!','#ef4444'); return; }
+      DB = { ...DB, ...data };
+      saveDB();
+      renderKhoroch();
+      toast('✅ রিস্টোর সফল হয়েছে!');
+    } catch(err){ toast('ফাইল সঠিক নয়!','#ef4444'); }
+  };
+  reader.readAsText(input.files[0]);
+}
+
+function updateAutoBackupStatus(){
+  // প্রতি ৭ দিনে রিমাইন্ডার
+  const last = localStorage.getItem('amarhisab_last_backup');
+  if(!last) return;
+  const diff = (Date.now() - new Date(last).getTime()) / (1000*60*60*24);
+  if(diff > 7) toast('⚠️ ৭ দিন হলো ব্যাকআপ নিন!', '#f59e0b');
+}
+
+// ══ DELETE ══
+function deleteEntry(type, id){
+  if(!confirm('এই এন্ট্রি মুছে দেবেন?')) return;
+  DB[type] = DB[type].filter(e=>e.id!==id);
+  saveDB();
+  if(type==='khoroch') renderKhoroch();
+  if(type==='income') renderIncome();
+  if(type==='savings') renderSavings();
+  toast('🗑️ মুছে ফেলা হয়েছে!');
+}
+
+function viewPhoto(id){
+  const e = [...DB.khoroch].find(x=>x.id===id);
+  if(!e||!e.photo) return;
+  document.getElementById('kh-zoom-img').src = e.photo;
+  document.getElementById('kh-photo-zoom').style.display = 'flex';
+}
+
+// ══ AUTOCOMPLETE HELPERS ══
+function showAC(id, items, fn){
+  const el = document.getElementById(id);
+  if(!items.length){ el.style.display='none'; return; }
+  el.innerHTML = items.map(v=>`<div class="ac-item" onclick="${fn}('${v.replace(/'/g,"&#39;")}')">${v}</div>`).join('');
+  el.style.display = 'block';
+}
+function hideAC(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+document.addEventListener('click', e=>{ if(!e.target.closest('.ac-wrap')) document.querySelectorAll('.ac-list').forEach(el=>el.style.display='none'); });
+
+// ══ SETTINGS ══
+function saveUserName(){
+  DB.userName = document.getElementById('user-name').value.trim();
+  saveDB();
+  initHeader();
+  toast('✅ নাম সেভ হয়েছে!');
+}
+
+// ══ PWA ══
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  _deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'block';
+});
+function installPWA(){
+  if(!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(()=>{ _deferredPrompt=null; document.getElementById('install-btn').style.display='none'; });
+}
+
+// ══ SERVICE WORKER ══
+if('serviceWorker' in navigator){
+  const swCode = `
+const CACHE='amarhisab-v1';
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));`;
+  const blob = new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+// ══ INIT ══
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadDB();
+  // তারিখ সেট
+  ['kh-date','in-date','ln-date','sv-date'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = today();
+  });
+  initHeader();
+  switchTab('khoroch');
+  // ব্যাকআপ রিমাইন্ডার চেক
+  updateAutoBackupStatus();
+  // অটো ব্যাকআপ রিমাইন্ডার — প্রতিদিন একবার
+  const lastRemind = localStorage.getItem('amarhisab_last_remind');
+  const todayStr = today();
+  if(lastRemind !== todayStr){
+    const last = localStorage.getItem('amarhisab_last_backup');
+    if(last){
+      const diff = (Date.now()-new Date(last).getTime())/(1000*60*60*24);
+      if(diff>6){ setTimeout(()=>toast('💾 ব্যাকআপ নেওয়ার সময় হয়েছে!','#f59e0b'), 3000); }
+    }
+    localStorage.setItem('amarhisab_last_remind', todayStr);
+  }
+});
+</script>
+</body>
+</html>
